@@ -177,8 +177,8 @@ bun run dev
 
 | Command | Description |
 |---------|-------------|
-| `bun run dev` | Start development server |
-| `bun run start` | Start with nodemon auto-reload |
+| `bun dev` | Start development server |
+| `bun start` | Start with nodemon auto-reload |
 
 ## Security Features
 
