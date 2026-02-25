@@ -1,4 +1,4 @@
-# Khachale
+# KahinChale
 
 A TypeScript-based authentication API built with Express, Prisma, and PostgreSQL. Provides user registration, login, JWT-based session management, and OTP verification.
 
