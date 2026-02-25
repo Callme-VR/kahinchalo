@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import type { Request, Response } from "express";
+import type { AuthenticatedRequest } from "../../types/express";
 import { generateToken } from "../../utils/generatetoken/generateToken";
 import { prisma } from "../../lib/db";
 
@@ -117,24 +118,13 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-export const logoutUser = async (req: Request, res: Response): Promise<void> => {
+export const logoutUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   console.log("Logout user request");
-  console.log("Request_body", req.body);
   try {
-    const { email } = req.body;
-
-    if (!email) {
-      res.status(400).json({ message: "Email is required" });
-      return;
-    }
-
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email }
-    });
+    const user = req.user;
 
     if (!user) {
-      res.status(404).json({ message: "User not found" });
+      res.status(401).json({ message: "User not authenticated" });
       return;
     }
 
@@ -143,12 +133,16 @@ export const logoutUser = async (req: Request, res: Response): Promise<void> => 
       where: { userId: user.id }
     });
 
+    // Clear the JWT cookie
+    res.clearCookie("jwt");
+
     console.log("User logged out successfully from DB");
 
     res.status(200).json({
       message: "Logout successful",
       user: {
-        email,
+        id: user.id,
+        email: user.email,
         loggedOut: true
       }
     });
@@ -158,24 +152,13 @@ export const logoutUser = async (req: Request, res: Response): Promise<void> => 
   }
 }
 
-export const refreshToken = async (req: Request, res: Response): Promise<void> => {
+export const refreshToken = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   console.log("Refresh token request");
-  console.log("Request_body", req.body);
   try {
-    const { email } = req.body;
-
-    if (!email) {
-      res.status(400).json({ message: "Email is required" });
-      return;
-    }
-
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email }
-    });
+    const user = req.user;
 
     if (!user) {
-      res.status(404).json({ message: "User not found" });
+      res.status(401).json({ message: "User not authenticated" });
       return;
     }
 

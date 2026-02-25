@@ -1,0 +1,52 @@
+import type { Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+import type { AuthenticatedRequest } from "../../types/express";
+import { prisma } from "../../lib/db";
+
+interface JwtPayload {
+  id: string;
+}
+
+export const authenticateUser = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const token = req.cookies?.jwt;
+
+    if (!token) {
+      res.status(401).json({ message: "Authentication required" });
+      return;
+    }
+
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET not configured");
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+    });
+
+    if (!user) {
+      res.status(401).json({ message: "User not found" });
+      return;
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      res.status(401).json({ message: "Invalid token" });
+      return;
+    }
+    if (error instanceof jwt.TokenExpiredError) {
+      res.status(401).json({ message: "Token expired" });
+      return;
+    }
+    console.error("Authentication error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
