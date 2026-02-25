@@ -1,6 +1,6 @@
 # KahinChale
 
-A TypeScript-based authentication API built with Express, Prisma, and PostgreSQL. Provides user registration, login, JWT-based session management, and OTP verification.
+A comprehensive travel booking platform built with TypeScript, Express, Prisma, and PostgreSQL. Features user authentication, trip management, booking system, support queries, and wishlist functionality for a complete travel experience.
 
 ## Tech Stack
 
@@ -10,6 +10,7 @@ A TypeScript-based authentication API built with Express, Prisma, and PostgreSQL
 - **ORM:** Prisma
 - **Authentication:** JWT (jsonwebtoken) + bcrypt + cookie-parser
 - **Language:** TypeScript
+- **Additional:** Zod for validation, Morgan for logging, Helmet for security, CORS
 
 ## Project Structure
 
@@ -24,11 +25,15 @@ khachale/
 │   ├── types/
 │   │   └── express.d.ts       # Express type extensions (AuthenticatedRequest)
 │   ├── controllers/
-│   │   └── authControllers/
-│   │       └── auth.controllers.ts   # Auth business logic
+│   │   ├── authControllers/
+│   │   │   └── auth.controllers.ts   # Authentication business logic
+│   │   └── userControllers/
+│   │       └── user.controllers.ts   # User profile & booking logic
 │   ├── routes/
-│   │   └── authRoutes/
-│   │       └── auth.routes.ts         # API route definitions
+│   │   ├── authRoutes/
+│   │   │   └── auth.routes.ts         # Authentication API routes
+│   │   └── userRoutes/
+│   │       └── user.routes.ts         # User management API routes
 │   ├── middleware/
 │   │   └── authMiddleware/
 │   │       └── auth.middleware.ts     # JWT authentication middleware
@@ -38,6 +43,9 @@ khachale/
 │   ├── lib/
 │   │   └── db.ts              # Database connection & Prisma client
 │   └── index.ts               # Application entry point
+├── test-endpoints.ts          # API testing script
+├── test-user-endpoints.ts     # User endpoints testing script
+├── test-refresh.ts            # Token refresh testing script
 ├── .env                       # Environment variables (not in git)
 ├── .gitignore
 ├── package.json
@@ -56,7 +64,7 @@ khachale/
 - `password`: String (hashed)
 - `createdAt`: DateTime
 - `updatedAt`: DateTime
-- Relations: has many `Session`, has many `OTP`
+- Relations: has many `Session`, `OTP`, `Booking`, `SupportQuery`, `Wishlist`
 
 **Session**
 - `id`: UUID (primary key)
@@ -78,9 +86,50 @@ khachale/
 - `updatedAt`: DateTime
 - Relations: optionally belongs to `User`
 
+**Trip**
+- `id`: UUID (primary key)
+- `title`: String
+- `description`: String?
+- `price`: Decimal
+- `location`: String
+- `startDate`: DateTime
+- `endDate`: DateTime
+- `createdAt`: DateTime
+- `updatedAt`: DateTime
+- Relations: has many `Booking`, `Wishlist`
+
+**Booking**
+- `id`: UUID (primary key)
+- `userId`: String (foreign key to User)
+- `tripId`: String (foreign key to Trip)
+- `status`: BookingStatus (PENDING, CONFIRMED, CANCELLED, COMPLETED)
+- `totalAmount`: Decimal
+- `createdAt`: DateTime
+- `updatedAt`: DateTime
+- Relations: belongs to `User`, belongs to `Trip`
+
+**SupportQuery**
+- `id`: UUID (primary key)
+- `userId`: String (foreign key to User)
+- `subject`: String
+- `message`: String
+- `category`: String?
+- `status`: QueryStatus (OPEN, IN_PROGRESS, RESOLVED, CLOSED)
+- `createdAt`: DateTime
+- `updatedAt`: DateTime
+- Relations: belongs to `User`
+
+**Wishlist**
+- `id`: UUID (primary key)
+- `userId`: String (foreign key to User)
+- `tripId`: String (foreign key to Trip)
+- `createdAt`: DateTime
+- Relations: belongs to `User`, belongs to `Trip`
+- Unique constraint on [userId, tripId]
+
 ## API Endpoints
 
-All endpoints prefixed with `/api/auth`
+### Authentication Endpoints (`/api/auth`)
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
@@ -91,7 +140,23 @@ All endpoints prefixed with `/api/auth`
 | POST | `/otp/send` | Send 6-digit OTP | No |
 | POST | `/otp/verify` | Verify OTP code | No |
 
-### Request/Response Examples to try out for fake user
+### User Management Endpoints (`/api/users`)
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/me` | Get user profile | Yes |
+| PUT | `/me` | Update user profile | Yes |
+| POST | `/queries` | Submit support query | Yes |
+| GET | `/bookings` | Get booking history | Yes |
+| POST | `/wishlist/:tripId` | Add trip to wishlist | Yes |
+
+### Health Check
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/check` | Health check endpoint | No |
+
+### Request/Response Examples
 
 **Register User**
 ```bash
@@ -116,6 +181,49 @@ Content-Type: application/json
 }
 ```
 Response sets HTTP-only JWT cookie automatically.
+
+**Get User Profile (Auth Required)**
+```bash
+GET /api/users/me
+Cookie: jwt=<your-token>
+```
+
+**Update User Profile (Auth Required)**
+```bash
+PUT /api/users/me
+Cookie: jwt=<your-token>
+Content-Type: application/json
+
+{
+  "name": "John Updated",
+  "email": "johnupdated@example.com"
+}
+```
+
+**Submit Support Query (Auth Required)**
+```bash
+POST /api/users/queries
+Cookie: jwt=<your-token>
+Content-Type: application/json
+
+{
+  "subject": "Trip Booking Issue",
+  "message": "I'm having trouble booking the Himalayan trek.",
+  "category": "booking"
+}
+```
+
+**Get Booking History (Auth Required)**
+```bash
+GET /api/users/bookings
+Cookie: jwt=<your-token>
+```
+
+**Add Trip to Wishlist (Auth Required)**
+```bash
+POST /api/users/wishlist/trip-uuid-here
+Cookie: jwt=<your-token>
+```
 
 **Logout User (Auth Required)**
 ```bash
@@ -179,6 +287,24 @@ bun run dev
 |---------|-------------|
 | `bun dev` | Start development server |
 | `bun start` | Start with nodemon auto-reload |
+| `bun prisma migrate dev` | Run database migrations |
+| `bun prisma generate` | Generate Prisma client |
+| `bun test-endpoints.ts` | Test all API endpoints |
+
+## Testing
+
+The project includes comprehensive testing scripts:
+
+- **`test-endpoints.ts`** - Tests all authentication endpoints
+- **`test-user-endpoints.ts`** - Tests user management endpoints  
+- **`test-refresh.ts`** - Tests token refresh functionality
+
+Run tests with:
+```bash
+bun run test-endpoints.ts
+bun run test-user-endpoints.ts
+bun run test-refresh.ts
+```
 
 ## Security Features
 
@@ -188,13 +314,51 @@ bun run dev
 - Session tracking in database
 - OTP expires after 10 minutes
 - Secure cookie settings in production
+- Zod validation for input sanitization
+- Helmet.js for security headers (commented out, ready for production)
+
+## Key Features
+
+### Authentication & Authorization
+- JWT-based authentication with HTTP-only cookies
+- Secure password hashing with bcrypt
+- OTP verification for mobile/aadhaar verification
+- Session management with database tracking
+- Token refresh mechanism
+
+### User Management
+- Profile creation and management
+- Email uniqueness validation
+- Support query system with status tracking
+- Booking history management
+- Wishlist functionality for trips
+
+### Travel Platform Features
+- Trip management with pricing and scheduling
+- Booking system with status tracking (PENDING, CONFIRMED, CANCELLED, COMPLETED)
+- Support ticket system with categories
+- Wishlist for saving favorite trips
 
 ## Notes for Contributors
 
-- **Authentication Flow:** Login/Register sets HTTP-only JWT cookie → Protected routes (`/logout`, `/refresh`) use `authenticateUser` middleware → Middleware validates JWT and attaches user to `req.user` via `AuthenticatedRequest` type
+- **Authentication Flow:** Login/Register sets HTTP-only JWT cookie → Protected routes use `authenticateUser` middleware → Middleware validates JWT and attaches user to `req.user` via `AuthenticatedRequest` type
+- **Database Relations:** All user-related data (bookings, queries, wishlist) is properly linked with cascade deletes
+- **Error Handling:** Comprehensive error handling with appropriate HTTP status codes
+- **Validation:** Input validation using Zod schemas (ensure to add validation schemas as needed)
+- **Testing:** Use the provided test scripts to verify functionality before deployment
 - The project uses ES modules (`"type": "module"` in package.json)
 - Prisma client is generated to `src/generated/prisma/` (do not edit manually)
-- Console logging is enabled for debugging; remove in production
+- Console logging is enabled for debugging; consider removing in production
 - Use `AuthenticatedRequest` type from `src/types/express.d.ts` for protected route controllers
+
+## Production Considerations
+
+- Uncomment and configure Helmet.js for security headers
+- Uncomment and configure CORS for cross-origin requests
+- Uncomment Morgan for request logging in production
+- Set appropriate environment variables for production
+- Configure secure cookie settings
+- Set up proper database connection pooling
+- Consider implementing rate limiting for API endpoints
 
 This project was created using `bun init` in bun v1.3.4. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
