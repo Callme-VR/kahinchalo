@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 // import morgan from "morgan";
 // import helmet from "helmet";
 import authRoutes from "./routes/authRoutes/auth.routes";
+import userRoutes from "./routes/userRoutes/user.routes";
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.get("/check", (_req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 
 // Connect to database and start server
