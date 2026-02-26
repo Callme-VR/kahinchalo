@@ -2,7 +2,7 @@
 # Using multi-stage build for smaller image size
 
 # Stage 1: Dependencies
-FROM oven/bun:1-alpine AS deps
+FROM oven/bun:1.1.20-alpine AS deps
 WORKDIR /app
 
 # Copy package files
@@ -12,7 +12,7 @@ COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
 # Stage 2: Builder
-FROM oven/bun:1-alpine AS builder
+FROM oven/bun:1.1.20-alpine AS builder
 WORKDIR /app
 
 # Copy dependencies from deps stage
@@ -26,7 +26,7 @@ COPY . .
 RUN bun prisma generate
 
 # Stage 3: Production
-FROM oven/bun:1-alpine AS runner
+FROM oven/bun:1.1.20-alpine AS runner
 WORKDIR /app
 
 # Set environment to production
@@ -43,10 +43,6 @@ COPY --from=builder --chown=bunuser:nodejs /app/src ./src
 COPY --from=builder --chown=bunuser:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=bunuser:nodejs /app/package.json ./
 COPY --from=builder --chown=bunuser:nodejs /app/tsconfig.json ./
-
-# Create directory for Prisma generated client and set permissions
-RUN mkdir -p /app/src/generated/prisma && \
-    chown -R bunuser:nodejs /app
 
 # Switch to non-root user
 USER bunuser

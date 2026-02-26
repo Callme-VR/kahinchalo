@@ -1,7 +1,7 @@
 # Development Dockerfile for KahinChale
 # Optimized for hot reloading and local development
 
-FROM oven/bun:1-alpine
+FROM oven/bun:1.1.20-alpine
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ RUN bun install
 # Copy prisma schema for generation
 COPY prisma ./prisma/
 
-# Generate Prisma client
+# Generate Prisma client (local development will overlay src, but this ensures a base exists)
 RUN bun prisma generate
 
 # Set environment
@@ -22,5 +22,5 @@ ENV PORT=5000
 # Expose port
 EXPOSE 5000
 
-# Default command (can be overridden in docker-compose)
+# Default command
 CMD ["bun", "run", "dev"]
