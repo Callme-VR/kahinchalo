@@ -132,12 +132,12 @@ export const getTripDetails = async (
           orderBy: { createdAt: "desc" },
           take: 10,
         },
-        _count: {
-          select: {
-            bookings: true,
-            reviews: true,
-          },
-        },
+        // _count: {
+        //   select: {
+        //     bookings: true,
+        //     reviews: true,
+        //   },
+        // },
       },
     });
 
