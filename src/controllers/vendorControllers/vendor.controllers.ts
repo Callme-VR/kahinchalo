@@ -8,6 +8,8 @@ export const registerVendor = async (
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> => {
+  console.log("vendor created", req.body);
+
   try {
     const { name, email, password, phone, businessName, serviceCategory } =
       req.body;

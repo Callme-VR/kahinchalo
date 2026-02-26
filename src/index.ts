@@ -9,6 +9,8 @@ import userRoutes from "./routes/userRoutes/user.routes";
 import vendorRoutes from "./routes/vendorRoutes/vendor.routes";
 import categoryRoutes from "./routes/categoryRoutes/category.routes";
 import tripRoutes from "./routes/tripRoutes/trip.routes";
+import adminRoutes from "./routes/adminRoutes/admin.routes";
+import reviewRoutes from "./routes/reviewRoutes/review.routes";
 
 dotenv.config();
 
@@ -32,6 +34,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/vendors", vendorRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api/trips", tripRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 // Connect to database and start server
 const startServer = async () => {
