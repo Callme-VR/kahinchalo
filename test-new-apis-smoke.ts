@@ -9,7 +9,7 @@ async function runTests() {
     const vendorsRes = await fetch(`${API_BASE}/admin/vendors`);
     console.log("Status:", vendorsRes.status);
     const vendorsData = await vendorsRes.json();
-    console.log("Message:", vendorsData.message);
+    // console.log("Message:", vendorsData.message);
 
     // 2. Create Vendor Category
     console.log("\nTesting POST /admin/vendor-categories...");
@@ -23,7 +23,7 @@ async function runTests() {
     });
     console.log("Status:", catRes.status);
     const catData = await catRes.json();
-    console.log("Category ID:", catData.category?.id);
+    // console.log("Category ID:", catData.category?.id);
 
     // 3. List Queries
     console.log("\nTesting GET /admin/queries...");
@@ -35,7 +35,7 @@ async function runTests() {
     const revRes = await fetch(`${API_BASE}/admin/reports/revenue`);
     console.log("Status:", revRes.status);
     const revData = await revRes.json();
-    console.log("Total Revenue:", revData.report?.totalRevenue);
+    // console.log("Total Revenue:", revData.report?.totalRevenue);
 
     console.log("\nTesting GET /admin/reports/topvendors...");
     const topRes = await fetch(`${API_BASE}/admin/reports/topvendors`);
