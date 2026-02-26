@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kahinchale-app
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - DATABASE_URL=postgresql://postgres:password@db:5432/khachale?schema=public
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - kahinchale-network
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: kahinchale-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=khachale
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - kahinchale-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d khachale"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  kahinchale-network:
+    driver: bridge

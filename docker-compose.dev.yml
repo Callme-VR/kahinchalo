@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: kahinchale-app-dev
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - DATABASE_URL=postgresql://postgres:password@db:5432/khachale?schema=public
+      - JWT_SECRET=dev-secret-key-change-in-production
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/src/generated/prisma
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - kahinchale-network
+    command: bun run dev
+
+  db:
+    image: postgres:16-alpine
+    container_name: kahinchale-db-dev
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=khachale
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    networks:
+      - kahinchale-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d khachale"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_dev_data:
+
+networks:
+  kahinchale-network:
+    driver: bridge

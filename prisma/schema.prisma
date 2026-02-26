@@ -28,7 +28,7 @@ model User {
   bookings  Booking[]
   queries   SupportQuery[]
   wishlist  Wishlist[]
-  
+  reviews   Review[]
 
   @@map("users")
 }
@@ -71,11 +71,19 @@ model Trip {
   location    String
   startDate   DateTime
   endDate     DateTime
+  ageGroup    String?
+  maxCapacity Int?
+  currentCapacity Int @default(0)
+  categoryId  String?
+  vendorId    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   bookings Booking[]
   wishlist Wishlist[]
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  vendor   Vendor?   @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  reviews  Review[]
 
   @@map("trips")
 }
@@ -141,3 +149,71 @@ model Wishlist {
   @@index([tripId])
   @@map("wishlist")
 }
+
+model Vendor{
+  id String @id @default(uuid()) @unique
+  name String
+  email String @unique
+  password String
+  phone String?
+  description String?
+  businessName String?
+  businessLicense String?
+  isVerified Boolean @default(false)
+  rating Decimal @default(0)
+  totalReviews Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trips Trip[]
+  documents VendorDocument[]
+  reviews Review[]
+  
+  @@map("vendors")
+}
+
+model Category{
+  id String @id @default(uuid()) @unique
+  name String @unique
+  description String?
+  icon String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trips Trip[]
+  
+  @@map("categories")
+}
+
+model Review{
+  id String @id @default(uuid()) @unique
+  userId String
+  vendorId String?
+  tripId String?
+  rating Int
+  comment String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vendor Vendor? @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  trip Trip? @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  
+  @@map("reviews")
+}
+
+model VendorDocument{
+  id String @id @default(uuid()) @unique
+  vendorId String
+  documentType String
+  documentUrl String
+  isVerified Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  
+  @@map("vendor_documents")
+}
+
+

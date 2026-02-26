@@ -17,7 +17,33 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log("🌱 Seeding database...");
 
-  // Create sample trips only (user will be created via API)
+  // Create test user with properly hashed password (test123)
+  const hashedPassword = await bcrypt.hash("test123", 10);
+  const testUser = await prisma.user.upsert({
+    where: { email: "test@example.com" },
+    update: {},
+    create: {
+      name: "Test User",
+      email: "test@example.com",
+      password: hashedPassword,
+    },
+  });
+  console.log("✅ Test user created:", testUser.id);
+
+  // Create second test user (ak@gmail.com / akash@123)
+  const hashedPassword2 = await bcrypt.hash("akash@123", 10);
+  const testUser2 = await prisma.user.upsert({
+    where: { email: "ak@gmail.com" },
+    update: {},
+    create: {
+      name: "Akash User",
+      email: "ak@gmail.com",
+      password: hashedPassword2,
+    },
+  });
+  console.log("✅ Second test user created:", testUser2.id);
+
+  // Create sample trips
   const trips = await prisma.trip.createMany({
     data: [
       {
@@ -65,10 +91,83 @@ async function main() {
   });
   console.log("✅ Sample trips created:", trips.count);
 
+  // Get created trips for bookings
+  const allTrips = await prisma.trip.findMany();
+
+  // Create sample bookings for test user
+  if (allTrips.length >= 2) {
+    const bookings = await prisma.booking.createMany({
+      data: [
+        {
+          userId: testUser.id,
+          tripId: allTrips[0]!.id,
+          status: "CONFIRMED",
+          totalAmount: 12999.99,
+        },
+        {
+          userId: testUser.id,
+          tripId: allTrips[1]!.id,
+          status: "PENDING",
+          totalAmount: 8999.99,
+        },
+        {
+          userId: testUser2.id,
+          tripId: allTrips[2]!.id,
+          status: "CONFIRMED",
+          totalAmount: 15999.99,
+        },
+        {
+          userId: testUser2.id,
+          tripId: allTrips[3]!.id,
+          status: "COMPLETED",
+          totalAmount: 21999.99,
+        },
+      ],
+    });
+    console.log("✅ Sample bookings created:", bookings.count);
+  }
+
+  // Create sample support queries
+  const queries = await prisma.supportQuery.createMany({
+    data: [
+      {
+        userId: testUser.id,
+        subject: "Booking modification request",
+        message: "I need to change my travel dates for the Manali trip.",
+        category: "Booking",
+        status: "OPEN",
+      },
+      {
+        userId: testUser.id,
+        subject: "Payment issue",
+        message: "My payment was deducted but booking not confirmed.",
+        category: "Payment",
+        status: "IN_PROGRESS",
+      },
+      {
+        userId: testUser2.id,
+        subject: "Refund request",
+        message: "I want to cancel my Rajasthan trip and get a refund.",
+        category: "Refund",
+        status: "OPEN",
+      },
+      {
+        userId: testUser2.id,
+        subject: "Trip enquiry",
+        message: "Are meals included in the Kerala backwaters package?",
+        category: "General",
+        status: "RESOLVED",
+      },
+    ],
+  });
+  console.log("✅ Sample support queries created:", queries.count);
+
   console.log("🎉 Seeding completed!");
-  console.log("\n📋 Test Credentials (register via API):");
+  console.log("\n📋 Test Credentials:");
   console.log("   Email: test@example.com");
   console.log("   Password: test123");
+  console.log("\n   Email: ak@gmail.com");
+  console.log("   Password: akash@123");
 }
 
 main()

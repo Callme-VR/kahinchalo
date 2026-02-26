@@ -6,6 +6,9 @@ import cookieParser from "cookie-parser";
 // import helmet from "helmet";
 import authRoutes from "./routes/authRoutes/auth.routes";
 import userRoutes from "./routes/userRoutes/user.routes";
+import vendorRoutes from "./routes/vendorRoutes/vendor.routes";
+import categoryRoutes from "./routes/categoryRoutes/category.routes";
+import tripRoutes from "./routes/tripRoutes/trip.routes";
 
 dotenv.config();
 
@@ -26,7 +29,9 @@ app.get("/check", (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-
+app.use("/api/vendors", vendorRoutes);
+app.use("/api", categoryRoutes);
+app.use("/api/trips", tripRoutes);
 
 // Connect to database and start server
 const startServer = async () => {
