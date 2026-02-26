@@ -1,0 +1,129 @@
+﻿
+ΓòöΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòù
+Γòæ   KHACHALE API COMPREHENSIVE TEST SUITE          Γòæ
+ΓòÜΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓò¥
+
+ΓöüΓöüΓöü 1. HEALTH CHECK ΓöüΓöüΓöü
+  Γ£à [200] GET /check ΓåÆ "Hello World!"
+
+ΓöüΓöüΓöü 2. AUTH ROUTES ΓöüΓöüΓöü
+  Γ£à [400] POST /api/auth/register (missing fields)
+     ΓåÆ {"message":"All fields are required"}
+  Γ£à [201] POST /api/auth/register (success)
+     ΓåÆ {"message":"User registered successfully","user":{"id":"576cca75-cbd1-40cd-85b0-31a2c2b959da","name":"Test User","email":"testuser_1772110318256@example.com","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXV...
+  Γ£à [409] POST /api/auth/register (duplicate email)
+     ΓåÆ {"message":"User already exists with this email"}
+  Γ£à [401] POST /api/auth/login (wrong password)
+     ΓåÆ {"message":"Invalid credentials"}
+  Γ£à [400] POST /api/auth/login (missing password)
+     ΓåÆ {"message":"Email and password are required"}
+  Γ£à [200] POST /api/auth/login (success)
+     ΓåÆ {"message":"Login successful","user":{"id":"576cca75-cbd1-40cd-85b0-31a2c2b959da","name":"Test User","email":"testuser_1772110318256@example.com","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6...
+  Γ¥î [500] POST /api/auth/refresh (authenticated) (expected 200)
+     ΓåÆ {"message":"Internal server error"}
+  Γ£à [401] POST /api/auth/refresh (no auth)
+     ΓåÆ {"message":"Authentication required"}
+  Γ£à [400] POST /api/auth/otp/send (missing aadhaarOrMobile)
+     ΓåÆ {"message":"Aadhaar number or mobile is required"}
+  Γ£à [200] POST /api/auth/otp/send (success)
+     ΓåÆ {"message":"OTP sent successfully","aadhaarOrMobile":"9876543210","otp":"650939","expiresIn":"10 minutes"}
+  Γ£à [400] POST /api/auth/otp/verify (invalid OTP)
+     ΓåÆ {"message":"Invalid OTP"}
+  Γ£à [200] POST /api/auth/otp/verify (success)
+     ΓåÆ {"message":"OTP verified successfully","aadhaarOrMobile":"9876543210","verified":true}
+  Γ£à [400] POST /api/auth/otp/verify (missing otp)
+     ΓåÆ {"message":"Aadhaar/mobile and OTP are required"}
+
+ΓöüΓöüΓöü 3. USER ROUTES ΓöüΓöüΓöü
+  Γ£à [401] GET /api/users/me (no auth)
+     ΓåÆ {"message":"Authentication required"}
+  Γ£à [200] GET /api/users/me (authenticated)
+     ΓåÆ {"message":"Profile retrieved successfully","user":{"id":"576cca75-cbd1-40cd-85b0-31a2c2b959da","name":"Test User","email":"testuser_1772110318256@example.com","createdAt":"2026-02-26T12:51:59.017Z","...
+  Γ£à [200] PUT /api/users/me (update name)
+     ΓåÆ {"message":"Profile updated successfully","user":{"id":"576cca75-cbd1-40cd-85b0-31a2c2b959da","name":"Updated Test User","email":"testuser_1772110318256@example.com","createdAt":"2026-02-26T12:51:59.0...
+  Γ£à [401] PUT /api/users/me (no auth)
+     ΓåÆ {"message":"Authentication required"}
+  Γ£à [400] POST /api/users/queries (missing message)
+     ΓåÆ {"message":"Subject and message are required"}
+  Γ£à [201] POST /api/users/queries (success)
+     ΓåÆ {"message":"Support query submitted successfully","query":{"id":"928d5c3c-58b7-4027-8994-af9cf458f5fa","subject":"Help needed","status":"OPEN","createdAt":"2026-02-26T12:52:01.171Z"}}
+  Γ£à [200] GET /api/users/bookings (authenticated)
+     ΓåÆ {"message":"Bookings retrieved successfully","bookings":[]}
+  Γ£à [401] GET /api/users/bookings (no auth)
+     ΓåÆ {"message":"Authentication required"}
+  Γ£à [404] POST /api/users/wishlist/:tripId (invalid trip)
+     ΓåÆ {"message":"Trip not found"}
+
+ΓöüΓöüΓöü 4. VENDOR ROUTES ΓöüΓöüΓöü
+  Γ£à [400] POST /api/vendors/register (missing fields)
+     ΓåÆ {"message":"Name, email, and password are required"}
+  Γ£à [201] POST /api/vendors/register (success)
+     ΓåÆ {"message":"Vendor registered successfully","vendor":{"id":"a95dfdc7-8cec-443c-94e5-4f699de12cda","name":"Test Vendor","email":"testvendor_1772110318256@example.com","phone":"9876543210","description"...
+  Γ£à [409] POST /api/vendors/register (duplicate)
+     ΓåÆ {"message":"Vendor with this email already exists"}
+  Γ£à [200] GET /api/vendors/:id (valid)
+     ΓåÆ {"message":"Vendor profile retrieved successfully","vendor":{"id":"a95dfdc7-8cec-443c-94e5-4f699de12cda","name":"Test Vendor","businessName":"Test Travel Co","description":null,"rating":"0","totalRevi...
+  Γ£à [404] GET /api/vendors/:id (not found)
+     ΓåÆ {"message":"Vendor not found"}
+  Γ£à [200] GET /api/vendors/:id/reviews (valid)
+     ΓåÆ {"message":"Vendor reviews retrieved successfully","reviews":[]}
+  Γ£à [404] GET /api/vendors/:id/reviews (not found)
+     ΓåÆ {"message":"Vendor not found"}
+  Γ£à [200] PUT /api/vendors/:id (authenticated)
+     ΓåÆ {"message":"Vendor profile updated successfully","vendor":{"id":"a95dfdc7-8cec-443c-94e5-4f699de12cda","name":"Test Vendor","email":"testvendor_1772110318256@example.com","phone":"9876543210","descrip...
+  Γ£à [401] PUT /api/vendors/:id (no auth)
+     ΓåÆ {"message":"Authentication required"}
+  Γ£à [401] POST /api/vendors/documents (no auth)
+     ΓåÆ {"message":"Authentication required"}
+  Γ£à [201] POST /api/vendors/documents (authenticated)
+     ΓåÆ {"message":"Document uploaded successfully","document":{"id":"8885c109-24f1-48ff-ac64-b891e0da8333","vendorId":"a95dfdc7-8cec-443c-94e5-4f699de12cda","documentType":"license","documentUrl":"https://ex...
+  Γ£à [400] POST /api/vendors/documents (missing documentUrl)
+     ΓåÆ {"message":"Vendor ID, document type, and document URL are required"}
+
+ΓöüΓöüΓöü 5. CATEGORY ROUTES ΓöüΓöüΓöü
+  Γ£à [200] GET /api/categories
+     ΓåÆ {"message":"Categories retrieved successfully","categories":[]}
+  Γ£à [404] POST /api/categories/:id/trips (not found)
+     ΓåÆ {"message":"Category not found"}
+
+ΓöüΓöüΓöü 6. TRIP ROUTES ΓöüΓöüΓöü
+  Γ£à [200] GET /api/trips (no filters)
+     ΓåÆ {"message":"Trips retrieved successfully","trips":[{"id":"d3ebf046-1907-4b66-8f1d-e908809abdce","title":"Manali Mountain Retreat","description":"Experience the serene beauty of Manali with snow-capped...
+     (stored tripId: d3ebf046...)
+     Total trips: 5
+  Γ£à [200] GET /api/trips?page=1&limit=5
+     ΓåÆ {"message":"Trips retrieved successfully","trips":[{"id":"d3ebf046-1907-4b66-8f1d-e908809abdce","title":"Manali Mountain Retreat","description":"Experience the serene beauty of Manali with snow-capped...
+  Γ£à [200] GET /api/trips?location=Goa
+     ΓåÆ {"message":"Trips retrieved successfully","trips":[{"id":"fcedc8f4-4821-4acb-ab97-d9159849383e","title":"Goa Beach Paradise","description":"Relax on pristine beaches and enjoy vibrant nightlife in Goa...
+  Γ£à [200] GET /api/trips?budget=5000
+     ΓåÆ {"message":"Trips retrieved successfully","trips":[],"pagination":{"page":1,"limit":10,"total":0,"totalPages":0}}
+  Γ£à [200] GET /api/trips/:id (valid)
+     ΓåÆ {"message":"Trip details retrieved successfully","trip":{"id":"d3ebf046-1907-4b66-8f1d-e908809abdce","title":"Manali Mountain Retreat","description":"Experience the serene beauty of Manali with snow-c...
+  Γ£à [404] GET /api/trips/:id (not found)
+     ΓåÆ {"message":"Trip not found"}
+  Γ£à [401] POST /api/trips/bookings (no auth)
+     ΓåÆ {"message":"Authentication required"}
+  Γ£à [400] POST /api/trips/bookings (missing tripId)
+     ΓåÆ {"message":"Trip ID is required"}
+  Γ£à [404] POST /api/trips/bookings (trip not found)
+     ΓåÆ {"message":"Trip not found"}
+  Γ£à [201] POST /api/trips/bookings (valid)
+     ΓåÆ {"message":"Booking created successfully","booking":{"id":"8d1f1286-2a51-4ed8-8e4d-1ee93f2e661a","userId":"576cca75-cbd1-40cd-85b0-31a2c2b959da","tripId":"d3ebf046-1907-4b66-8f1d-e908809abdce","status...
+  Γ£à [201] POST /api/users/wishlist/:tripId (valid trip)
+     ΓåÆ {"message":"Added to wishlist successfully","wishlist":{"id":"a08b03c3-a249-4367-b591-4b4163649776","userId":"576cca75-cbd1-40cd-85b0-31a2c2b959da","tripId":"d3ebf046-1907-4b66-8f1d-e908809abdce","cre...
+  Γ£à [409] POST /api/users/wishlist/:tripId (duplicate)
+     ΓåÆ {"message":"Trip already in wishlist"}
+
+ΓöüΓöüΓöü 7. AUTH - LOGOUT ΓöüΓöüΓöü
+  Γ£à [200] POST /api/auth/logout (authenticated)
+     ΓåÆ {"message":"Logout successful","user":{"id":"576cca75-cbd1-40cd-85b0-31a2c2b959da","email":"testuser_1772110318256@example.com","loggedOut":true}}
+  Γ£à [401] POST /api/auth/logout (no auth)
+     ΓåÆ {"message":"Authentication required"}
+
+ΓòöΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòù
+Γòæ                   TEST SUMMARY                   Γòæ
+ΓòáΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòú
+Γòæ  Total:  51    Passed: 50    Failed: 1          Γòæ
+Γòæ  Pass Rate: 98.0%                              Γòæ
+ΓòÜΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓò¥
+
