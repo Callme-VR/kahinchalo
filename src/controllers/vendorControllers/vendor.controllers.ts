@@ -6,13 +6,16 @@ import bcrypt from "bcrypt";
 // POST /vendors/register - Vendor registration
 export const registerVendor = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
-    const { name, email, password, phone, businessName, businessLicense } = req.body;
+    const { name, email, password, phone, businessName, serviceCategory } =
+      req.body;
 
     if (!name || !email || !password) {
-      res.status(400).json({ message: "Name, email, and password are required" });
+      res
+        .status(400)
+        .json({ message: "Name, email, and password are required" });
       return;
     }
 
@@ -22,7 +25,9 @@ export const registerVendor = async (
     });
 
     if (existingVendor) {
-      res.status(409).json({ message: "Vendor with this email already exists" });
+      res
+        .status(409)
+        .json({ message: "Vendor with this email already exists" });
       return;
     }
 
@@ -37,7 +42,7 @@ export const registerVendor = async (
         password: hashedPassword,
         phone,
         businessName,
-        businessLicense,
+        serviceCategory,
       },
     });
 
@@ -57,7 +62,7 @@ export const registerVendor = async (
 // GET /vendors/:id - Vendor public profile
 export const getVendorProfile = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { id } = req.params;
@@ -113,7 +118,7 @@ export const getVendorProfile = async (
 // PUT /vendors/:id - Update vendor info (own)
 export const updateVendorProfile = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const user = req.user;
@@ -141,21 +146,22 @@ export const updateVendorProfile = async (
 
     // For now, we'll assume user can update any vendor profile
     // In a real app, you'd check if the user owns this vendor profile
-    const { name, phone, description, businessName, businessLicense } = req.body;
+    const { name, phone, description, businessName, serviceCategory } =
+      req.body;
 
     const updateData: {
       name?: string;
       phone?: string;
       description?: string;
       businessName?: string;
-      businessLicense?: string;
+      serviceCategory?: string;
     } = {};
 
     if (name) updateData.name = name;
     if (phone) updateData.phone = phone;
     if (description) updateData.description = description;
     if (businessName) updateData.businessName = businessName;
-    if (businessLicense) updateData.businessLicense = businessLicense;
+    if (serviceCategory) updateData.serviceCategory = serviceCategory;
 
     const updatedVendor = await prisma.vendor.update({
       where: { id: id as string },
@@ -178,7 +184,7 @@ export const updateVendorProfile = async (
 // GET /vendors/:id/reviews - Get vendor reviews
 export const getVendorReviews = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { id } = req.params;
@@ -224,7 +230,7 @@ export const getVendorReviews = async (
 // POST /vendors/documents - Upload verification docs
 export const uploadVendorDocument = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const user = req.user;
@@ -236,7 +242,9 @@ export const uploadVendorDocument = async (
     }
 
     if (!vendorId || !documentType || !documentUrl) {
-      res.status(400).json({ message: "Vendor ID, document type, and document URL are required" });
+      res.status(400).json({
+        message: "Vendor ID, document type, and document URL are required",
+      });
       return;
     }
 

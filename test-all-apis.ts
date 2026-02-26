@@ -316,7 +316,7 @@ async function runTests() {
       password: "vendorpass123",
       phone: "9876543210",
       businessName: "Test Travel Co",
-      businessLicense: "LIC123456",
+      serviceCategory: "LIC123456",
     });
     log("POST /api/vendors/register (success)", status, data, 201);
     testVendorId = data?.vendor?.id || "";

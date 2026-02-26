@@ -5,7 +5,7 @@ import { prisma } from "../../lib/db";
 // GET /trips - List trips (filter: ageGroup, budget, location)
 export const listTrips = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { ageGroup, budget, location, page = "1", limit = "10" } = req.query;
@@ -56,12 +56,12 @@ export const listTrips = async (
               isVerified: true,
             },
           },
-          _count: {
-            select: {
-              bookings: true,
-              reviews: true,
-            },
-          },
+          // count: {
+          //   select: {
+          //     bookings: true,
+          //     reviews: true,
+          //   },
+          // },
         },
         orderBy: { startDate: "asc" },
         skip,
@@ -89,7 +89,7 @@ export const listTrips = async (
 // GET /trips/:id - Trip detail + data
 export const getTripDetails = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { id } = req.params;
@@ -159,7 +159,7 @@ export const getTripDetails = async (
 // POST /trips/bookings - Create booking
 export const createBooking = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const user = req.user;
@@ -187,7 +187,10 @@ export const createBooking = async (
     }
 
     // Check availability
-    if (trip.maxCapacity && trip.currentCapacity + numberOfPeople > trip.maxCapacity) {
+    if (
+      trip.maxCapacity &&
+      trip.currentCapacity + numberOfPeople > trip.maxCapacity
+    ) {
       res.status(400).json({ message: "Not enough capacity available" });
       return;
     }
