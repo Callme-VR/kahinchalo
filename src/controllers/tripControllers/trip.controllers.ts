@@ -56,12 +56,12 @@ export const listTrips = async (
               isVerified: true,
             },
           },
-          // count: {
-          //   select: {
-          //     bookings: true,
-          //     reviews: true,
-          //   },
-          // },
+          _count: {
+            select: {
+              reviews: true,
+              bookings: true,
+            },
+          },
         },
         orderBy: { startDate: "asc" },
         skip,
@@ -70,9 +70,21 @@ export const listTrips = async (
       prisma.trip.count({ where }),
     ]);
 
-    res.status(200).json({
+    // Transform trips to include calculated fields
+    const transformedTrips = trips.map(trip => {
+      return {
+        ...trip,
+        avg_rating: trip.avgRating.toNumber(),
+        image_url: trip.imageUrl,
+        promoted: trip.isPromoted,
+        review_count: trip._count.reviews,
+        duration: Math.ceil((trip.endDate.getTime() - trip.startDate.getTime()) / (1000 * 60 * 60 * 24)), // days
+        _count: undefined, // Remove internal count field
+      };
+    });
+  res.status(200).json({
       message: "Trips retrieved successfully",
-      trips,
+      trips: transformedTrips,
       pagination: {
         page: pageNum,
         limit: limitNum,
@@ -132,12 +144,12 @@ export const getTripDetails = async (
           orderBy: { createdAt: "desc" },
           take: 10,
         },
-        // _count: {
-        //   select: {
-        //     bookings: true,
-        //     reviews: true,
-        //   },
-        // },
+        _count: {
+          select: {
+            bookings: true,
+            reviews: true,
+          },
+        },
       },
     });
 
@@ -146,9 +158,20 @@ export const getTripDetails = async (
       return;
     }
 
+    // Transform trip to include calculated fields
+    const transformedTrip = {
+      ...trip,
+      avg_rating: trip.avgRating.toNumber(),
+      image_url: trip.imageUrl,
+      promoted: trip.isPromoted,
+      review_count: trip._count.reviews,
+      duration: Math.ceil((trip.endDate.getTime() - trip.startDate.getTime()) / (1000 * 60 * 60 * 24)), // days
+      _count: undefined, // Remove internal count field
+    };
+
     res.status(200).json({
       message: "Trip details retrieved successfully",
-      trip,
+      trip: transformedTrip,
     });
   } catch (error) {
     console.error("Error fetching trip details:", error);

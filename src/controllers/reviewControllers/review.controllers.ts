@@ -106,6 +106,80 @@ export const rateVendor = async (
   }
 };
 
+// GET /reviews/trip/:tripId - Get trip reviews
+export const getTripReviews = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { tripId } = req.params;
+
+    const reviews = await prisma.review.findMany({
+      where: {
+        tripId: tripId as string,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    res.status(200).json({
+      message: "Trip reviews retrieved successfully",
+      reviews,
+      count: reviews.length,
+    });
+  } catch (error) {
+    console.error("Error getting trip reviews:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// GET /reviews/vendor/:vendorId - Get vendor reviews
+export const getVendorReviews = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { vendorId } = req.params;
+
+    const reviews = await prisma.review.findMany({
+      where: {
+        vendorId: vendorId as string,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    res.status(200).json({
+      message: "Vendor reviews retrieved successfully",
+      reviews,
+      count: reviews.length,
+    });
+  } catch (error) {
+    console.error("Error getting vendor reviews:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // POST /reviews/user/:userId - Vendor rates user
 export const rateUser = async (
   req: AuthenticatedRequest,

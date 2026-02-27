@@ -79,6 +79,8 @@ model Trip {
   promotionTitle  String?
   categoryId      String?
   vendorId        String?
+  imageUrl        String?
+  avgRating       Decimal  @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
