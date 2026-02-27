@@ -14,12 +14,12 @@ export const registerVendor = async (
     const { name, email, password, phone, businessName, serviceCategory } =
       req.body;
 
-    if (!name || !email || !password) {
-      res
-        .status(400)
-        .json({ message: "Name, email, and password are required" });
-      return;
-    }
+    // if (!name || !email || !password) {
+    //   res
+    //     .status(400)
+    //     .json({ message: "Name, email, and password are required" });
+    //   return;
+    // }
 
     // Check if vendor already exists
     const existingVendor = await prisma.vendor.findUnique({
