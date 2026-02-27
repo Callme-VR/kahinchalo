@@ -205,6 +205,7 @@ export const createBooking = async (
         data: {
           userId: user.id,
           tripId,
+          numberOfPeople,
           totalAmount,
         },
         include: {

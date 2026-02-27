@@ -137,7 +137,12 @@ export const getBookings = async (
 
     const bookings = await prisma.booking.findMany({
       where: { userId: user.id },
-      include: {
+      select: {
+        id: true,
+        numberOfPeople: true,
+        status: true,
+        totalAmount: true,
+        createdAt: true,
         trip: {
           select: {
             id: true,
@@ -145,6 +150,7 @@ export const getBookings = async (
             location: true,
             startDate: true,
             endDate: true,
+            price: true,
           },
         },
       },

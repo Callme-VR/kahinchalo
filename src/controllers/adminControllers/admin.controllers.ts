@@ -246,6 +246,7 @@ export const getRevenueReport = async (
       },
       select: {
         totalAmount: true,
+        numberOfPeople: true,
         createdAt: true,
       },
     });
