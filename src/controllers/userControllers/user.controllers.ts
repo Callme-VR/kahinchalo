@@ -5,7 +5,7 @@ import { prisma } from "../../lib/db";
 // GET /users/me - Get own profile
 export const getProfile = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const user = req.user;
@@ -31,7 +31,7 @@ export const getProfile = async (
 // PUT /users/me - Update profile
 export const updateProfile = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const user = req.user;
@@ -81,7 +81,7 @@ export const updateProfile = async (
 // POST /users/queries - Post support query
 export const postQuery = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const user = req.user;
@@ -125,7 +125,7 @@ export const postQuery = async (
 // GET /users/bookings - Get booking history
 export const getBookings = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const user = req.user;
@@ -164,7 +164,7 @@ export const getBookings = async (
 // POST /users/wishlist/:tripId - Add to wishlist
 export const addToWishlist = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const user = req.user;
