@@ -10,10 +10,15 @@ interface JwtPayload {
 export const authenticateUser = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
-    const token = req.cookies?.jwt;
+    let token = req.cookies?.jwt;
+
+    // Also check for Authorization header
+    if (!token && req.headers.authorization?.startsWith("Bearer ")) {
+      token = req.headers.authorization.split(" ")[1];
+    }
 
     if (!token) {
       res.status(401).json({ message: "Authentication required" });
