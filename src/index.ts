@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import morgan from "morgan";
-import helmet from "helmet";
 import authRoutes from "./routes/authRoutes/auth.routes";
 import userRoutes from "./routes/userRoutes/user.routes";
 import vendorRoutes from "./routes/vendorRoutes/vendor.routes";
@@ -15,7 +14,7 @@ import reviewRoutes from "./routes/reviewRoutes/review.routes";
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
-const ALLOWED_ORIGINS = ['http://localhost:5173', 'http://localhost:3000'];
+const ALLOWED_ORIGINS = ['http://localhost:5173'];
 
 const app = express();
 
@@ -28,12 +27,6 @@ app.use(cors({
   exposedHeaders: ['Set-Cookie']
 }));
 
-// Temporarily disable all security middleware to isolate CORS
-// app.use(helmet({
-//   contentSecurityPolicy: false,
-//   crossOriginEmbedderPolicy: false,
-//   crossOriginResourcePolicy: { policy: "cross-origin" }
-// }));
 
 app.use(morgan("dev"));
 app.use(express.json());
