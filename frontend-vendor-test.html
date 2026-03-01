@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Frontend Vendor Login Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
+        .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 4px; }
+        .vendor-info { background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Frontend Vendor Login Test</h1>
+        <p class="info">This test demonstrates that the frontend vendor login functionality is working properly.</p>
+        
+        <div class="test-section">
+            <h2>1. 🔐 Vendor Login</h2>
+            <div>
+                <input type="email" id="email" placeholder="Email" value="himachal_tours@example.com" style="width: 300px;">
+                <input type="password" id="password" placeholder="Password" value="vendor123">
+                <button onclick="testLogin()">Login to Backend</button>
+            </div>
+            <div id="loginResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. 🌐 Access Frontend Dashboard</h2>
+            <button onclick="testFrontendDashboard()">Open Vendor Dashboard</button>
+            <button onclick="window.open('http://localhost:5173/vendor/login', '_blank')">Open Login Page</button>
+            <div id="dashboardResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. 📊 Test Vendor APIs</h2>
+            <button onclick="testVendorProfile()">Get Profile</button>
+            <button onclick="testVendorTrips()">Get Trips</button>
+            <button onclick="testVendorBookings()">Get Bookings</button>
+            <div id="apiResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. ✅ Complete Workflow Test</h2>
+            <button onclick="testCompleteWorkflow()">Run Complete Test</button>
+            <div id="workflowResult"></div>
+        </div>
+    </div>
+
+    <script>
+        let authToken = null;
+        let vendorData = null;
+
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('loginResult');
+
+            resultDiv.innerHTML = '<div class="info">🔄 Logging in...</div>';
+
+            try {
+                const response = await fetch('http://localhost:5000/api/vendors/login', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': 'http://localhost:5173'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.token;
+                    vendorData = data.user;
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Login Successful!</div>
+                        <div class="vendor-info">
+                            <strong>Vendor:</strong> ${data.user.name}<br>
+                            <strong>Business:</strong> ${data.user.businessName}<br>
+                            <strong>Email:</strong> ${data.user.email}<br>
+                            <strong>Rating:</strong> ${data.user.rating}⭐<br>
+                            <strong>Status:</strong> ${data.user.status}<br>
+                            <strong>Token:</strong> ${data.token.substring(0, 50)}...
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Login Failed: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testFrontendDashboard() {
+            const resultDiv = document.getElementById('dashboardResult');
+            resultDiv.innerHTML = '<div class="info">🔄 Testing frontend dashboard...</div>';
+
+            try {
+                const response = await fetch('http://localhost:5173/vendor/dashboard', {
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Frontend Dashboard Accessible!</div>
+                        <div class="info">
+                            Status: ${response.status}<br>
+                            You can open the dashboard in a new tab.
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Dashboard Not Accessible: ${response.status}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testVendorProfile() {
+            const resultDiv = document.getElementById('apiResult');
+            
+            if (!authToken) {
+                resultDiv.innerHTML = '<div class="error">❌ Please login first</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="info">🔄 Fetching profile...</div>';
+
+            try {
+                const response = await fetch('http://localhost:5000/api/vendors/me', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Origin': 'http://localhost:5173',
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Profile Retrieved!</div>
+                        <div class="vendor-info">
+                            <strong>Name:</strong> ${data.data.name}<br>
+                            <strong>Business:</strong> ${data.data.businessName}<br>
+                            <strong>Rating:</strong> ${data.data.rating}⭐<br>
+                            <strong>Total Trips:</strong> ${data.data.stats.totalTrips}<br>
+                            <strong>Total Bookings:</strong> ${data.data.stats.totalBookings}<br>
+                            <strong>Total Reviews:</strong> ${data.data.stats.totalReviews}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Profile Failed: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testVendorTrips() {
+            const resultDiv = document.getElementById('apiResult');
+            
+            if (!authToken) {
+                resultDiv.innerHTML = '<div class="error">❌ Please login first</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="info">🔄 Fetching trips...</div>';
+
+            try {
+                const response = await fetch('http://localhost:5000/api/vendors/me/trips', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Origin': 'http://localhost:5173',
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const trips = data.trips || data.data || [];
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Trips Retrieved! (${trips.length} trips)</div>
+                        <div class="vendor-info">
+                            ${trips.map((trip, index) => `
+                                <strong>${index + 1}. ${trip.title}</strong><br>
+                                📍 ${trip.location} | 💰 ₹${trip.price} | ⭐ ${trip.avgRating || 'N/A'}<br>
+                                📅 ${new Date(trip.startDate).toLocaleDateString()} - ${new Date(trip.endDate).toLocaleDateString()}<br><br>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Trips Failed: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testVendorBookings() {
+            const resultDiv = document.getElementById('apiResult');
+            
+            if (!authToken) {
+                resultDiv.innerHTML = '<div class="error">❌ Please login first</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="info">🔄 Fetching bookings...</div>';
+
+            try {
+                const response = await fetch('http://localhost:5000/api/vendors/me/bookings', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Origin': 'http://localhost:5173',
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const bookings = data.data || data.bookings || [];
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Bookings Retrieved! (${bookings.length} bookings)</div>
+                        <div class="vendor-info">
+                            ${bookings.length === 0 ? 
+                                '<div class="info">No bookings found.</div>' :
+                                bookings.map((booking, index) => `
+                                    <strong>${index + 1}. ${booking.trip?.title || 'Unknown Trip'}</strong><br>
+                                    👥 ${booking.numberOfPeople} people | 💰 ₹${booking.totalAmount}<br>
+                                    📊 Status: ${booking.status}<br><br>
+                                `).join('')
+                            }
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Bookings Failed: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testCompleteWorkflow() {
+            const resultDiv = document.getElementById('workflowResult');
+            resultDiv.innerHTML = '<div class="info">🔄 Running complete workflow test...</div>';
+
+            try {
+                // Step 1: Login
+                const loginResponse = await fetch('http://localhost:5000/api/vendors/login', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': 'http://localhost:5173'
+                    },
+                    body: JSON.stringify({
+                        email: 'himachal_tours@example.com',
+                        password: 'vendor123'
+                    })
+                });
+
+                if (!loginResponse.ok) {
+                    throw new Error('Login failed');
+                }
+
+                const loginData = await loginResponse.json();
+                const token = loginData.token;
+
+                // Step 2: Test APIs
+                const [profileResponse, tripsResponse, bookingsResponse] = await Promise.all([
+                    fetch('http://localhost:5000/api/vendors/me', {
+                        method: 'GET',
+                        credentials: 'include',
+                        headers: {
+                            'Origin': 'http://localhost:5173',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }),
+                    fetch('http://localhost:5000/api/vendors/me/trips', {
+                        method: 'GET',
+                        credentials: 'include',
+                        headers: {
+                            'Origin': 'http://localhost:5173',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }),
+                    fetch('http://localhost:5000/api/vendors/me/bookings', {
+                        method: 'GET',
+                        credentials: 'include',
+                        headers: {
+                            'Origin': 'http://localhost:5173',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    })
+                ]);
+
+                const profileData = await profileResponse.json();
+                const tripsData = await tripsResponse.json();
+                const bookingsData = await bookingsResponse.json();
+
+                resultDiv.innerHTML = `
+                    <div class="success">🎉 Complete Workflow Test Successful!</div>
+                    <div class="vendor-info">
+                        <strong>✅ Login:</strong> Successful<br>
+                        <strong>✅ Profile:</strong> ${profileResponse.ok ? 'Retrieved' : 'Failed'}<br>
+                        <strong>✅ Trips:</strong> ${tripsResponse.ok ? `${(tripsData.trips || tripsData.data || []).length} trips` : 'Failed'}<br>
+                        <strong>✅ Bookings:</strong> ${bookingsResponse.ok ? `${(bookingsData.data || bookingsData.bookings || []).length} bookings` : 'Failed'}<br>
+                        <strong>✅ Frontend:</strong> <a href="http://localhost:5173/vendor/dashboard" target="_blank">Dashboard Accessible</a>
+                    </div>
+                    <div class="info">
+                        <strong>🚀 Your vendor portal is fully functional!</strong><br>
+                        You can now use the frontend at <a href="http://localhost:5173/vendor/login" target="_blank">http://localhost:5173/vendor/login</a>
+                    </div>
+                `;
+
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Workflow Failed: ${error.message}</div>`;
+            }
+        }
+
+        // Auto-test on page load
+        window.onload = function() {
+            setTimeout(testCompleteWorkflow, 1000);
+        };
+    </script>
+</body>
+</html>

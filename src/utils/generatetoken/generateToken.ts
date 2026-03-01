@@ -15,7 +15,7 @@ export const generateToken=(userid:string,res:Response)=>{
           httpOnly:true,
           maxAge:30*24*60*60*1000,
           secure:process.env.NODE_ENV==="production",
-          sameSite:"strict"
+          sameSite:"none" // Changed for CORS
      })
      return token
 }

@@ -4,7 +4,9 @@ import type { AuthenticatedRequest } from "../../types/express";
 import { prisma } from "../../lib/db";
 
 interface JwtPayload {
-  id: string;
+  userId: string;
+  email: string;
+  role: string;
 }
 
 export const authenticateUser = async (
@@ -13,7 +15,7 @@ export const authenticateUser = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    let token = req.cookies?.jwt;
+    let token = req.cookies?.jwt || req.cookies?.authToken;
 
     // Also check for Authorization header
     if (!token && req.headers.authorization?.startsWith("Bearer ")) {
@@ -31,9 +33,18 @@ export const authenticateUser = async (
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
 
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-    });
+    let user;
+    
+    // Check if it's a vendor or regular user
+    if (decoded.role === 'vendor') {
+      user = await prisma.vendor.findUnique({
+        where: { id: decoded.userId },
+      });
+    } else {
+      user = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+      });
+    }
 
     if (!user) {
       res.status(401).json({ message: "User not found" });
